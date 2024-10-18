@@ -1,0 +1,125 @@
+---
+title: "Tutorial Solutions"
+date: "2024-10-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(plotly)
+```
+
+1. Introduction to Plotly
+Plotly is much more fun to play with. You can zoom in, hover over points for details, and explore data without generating a dozen static images.
+
+Let's first load the diamonds dataset. 
+```{r}
+data("diamonds")
+head(diamonds)
+```
+
+2. What Kind of Plot Should I Use? 
+
+Bar Plot: Great for categorical data.
+Scatter Plot: Perfect for two numerical variables.
+Histogram: Ideal for showing the distribution of one numeric variable.
+
+3. 
+
+Practice 1: Bar Plot (Categorical Data)
+Let’s start simple. A bar plot is great for comparing categories. Create a ggplot bar chart comparing the counts of diamonds by their cut quality. 
+
+```{r}
+# Create a ggplot bar chart
+bar_plot <- ggplot(diamonds, aes(x = cut)) + 
+  geom_bar() + 
+  ggtitle("Diamonds by Cut Quality") +
+  theme_minimal()
+
+bar_plot
+
+```
+
+Question: What do you notice about the distribution of cuts? Seems like more people go for ‘Ideal’ cuts!
+
+Now, let's add some bling by converting this into a plotly plot.
+
+```{r}
+# Convert to interactive plot
+ggplotly(bar_plot)
+
+```
+
+Look! You can now hover over the bars and see exactly how many diamonds there are in each category. Much shinier!
+
+4. 
+
+Practice 2: Scatter Plot (Two Numeric Variables)
+Scatter plots are perfect for showing relationships between two numerical variables. Let's check out the relationship between carat (weight) and price. Is bigger always better?
+
+```{r}
+# Create a ggplot scatter plot
+scatter_plot <- ggplot(diamonds, aes(x = carat, y = price)) + 
+  geom_point(alpha = 0.5, color = "blue") + 
+  ggtitle("Carat vs Price") +
+  theme_minimal()
+
+scatter_plot
+```
+
+Now, convert this to a Plotly plot so you can zoom in and get up close with those high-priced diamonds! 
+```{r}
+# Convert to interactive plot
+ggplotly(scatter_plot)
+```
+
+Question: What can you infer from this scatter plot? Does it seem like bigger diamonds (higher carats) cost more? But notice the steep jump in prices for certain diamonds.
+
+5. 
+
+Practice 3: Histogram (Distribution of Numeric Data)
+Histograms help you see the distribution of a single numeric variable. Let’s check out the distribution of diamond prices. Ready to be shocked?
+```{r}
+# Create a ggplot histogram
+histogram <- ggplot(diamonds, aes(x = price)) + 
+  geom_histogram(binwidth = 1000, fill = "green", color = "black") +
+  ggtitle("Distribution of Diamond Prices") +
+  theme_minimal()
+
+histogram
+```
+
+Make it interactive to explore those outlier prices!
+```{r}
+# Convert to interactive plot
+ggplotly(histogram)
+```
+
+Challenge: Try adjusting the binwidth in the histogram and see how it changes the shape of the distribution. What happens when you make the binwidth smaller or larger?
+
+6. 
+
+Bonus Practice: Add More Bling (Customization)
+The cool thing about Plotly is that you can keep customizing. Let’s spice up our scatter plot by adding color based on the diamond's clarity.
+```{r}
+# Create a customized ggplot scatter plot
+scatter_plot_colored <- ggplot(diamonds, aes(x = carat, y = price, color = clarity)) + 
+  geom_point(alpha = 0.5) + 
+  ggtitle("Carat vs Price (Colored by Clarity)") +
+  theme_minimal()
+
+# Convert to interactive plot
+ggplotly(scatter_plot_colored)
+```
+
+Now you can see the relationship between price, carat, and clarity interactively! Hover over the points to discover the clarity of those shiny diamonds.
+
+7. Wrapping Up
+Plotly is a fantastic way to make your visualizations more interactive and fun. You can zoom, hover, and explore your data in ways that static plots simply don’t allow. Plus, converting your ggplot plots to plotly is as easy as wrapping them in ggplotly()!
+
+In this tutorial, you learned how to:
+
+- Create a bar plot, scatter plot, and histogram with ggplot2.
+- Convert these plots into interactive plotly plots.
+- Customize plots and add more dimensions to your data visualizations.
