@@ -1,0 +1,694 @@
+---
+title: "Interactive Graphs with Plotly!"
+author: "Dominik Allen, Luisa Stuhrmann, and Fanus Ghorjani"
+subtitle: "IDS Workshop 28 October"
+output:
+  xaringan::moon_reader:
+    css:
+      - default
+      - "simons-touch.css"
+      - metropolis
+      - "metropolis-fonts"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+  html_document:
+    df_print: paged
+---
+
+## Agenda
+
+1. **Introduction**
+2. **Different Types of Plots**
+3. **ggplotly**
+4. **Resources**
+5. **Q and A**
+5. **Tutorial**
+
+---
+
+## Introduction
+
+- **What is Plotly?**
+  - Think of it as your personal graph genie—just rub the lamp (or type a few lines of code), and you will have magical graphs on your screen. Plotly is a graphing library that transforms mundane data into visual stories you can interact with.
+  
+- **Why use Plotly?**
+  - Simple syntax: If you can order coffee at a café, you can create graphs with Plotly.
+  - Integration with R: Plays nicely with our favorite programming language
+  - Versatility: From basic bar charts to 3D plots, Plotly supports a wide variety of graph types. 
+
+---
+## What is Plotly Good For?
+
+- **Interactive Visualizations:**  With Plotly, you can interact with your data like never before much better than with normal plots or visualization.
+
+- **Dashboards:** Want to impress your colleagues (or professor)? Plotly makes it easy to create dashboards that can make even the most mundane data look like you actually spent alot of time on it.
+
+- **Presentation:** You wont need anymore basic ggplots and static graphs. Using Plotly you can engage your audience while giving reports and presentations such as this! It also fits seamlessly into R Markdown allowing you to access your data directly.
+
+---
+
+## How to Use Plotly in R (Basic Example- Scatter Plot)
+
+1. **Install the Package**: `install.packages('plotly')`
+2. **Basic Example**: Using the 'Teams' dataset from the Lahman package, lets create a scatter plot to observe the numeric variables of attendance and homeruns to see if there is a trend.
+
+First, we create a static scatter plot.
+
+```{r, echo=FALSE, message=FALSE, Warning=FALSE}
+#load libraries
+library(Lahman)
+library(ggplot2)
+library(plotly)
+library(htmltools)
+library(dplyr)
+library(tidyr)
+
+## Static scatter plot
+
+# 2. Create the scatter plot
+p <- plot_ly(data = Teams, 
+             x = ~attendance,            # Attendance
+             y = ~HR,                    # Home runs
+             type = 'scatter',           # Type: Scatter plot
+             mode = 'markers',           # Mode: markers only
+             marker = list(
+               size = 8,                 # Point size
+               opacity = 0.6,            # Transparency
+               color = 'blue'            # Color
+             ),
+             hoverinfo = 'text',         # Hover information
+             text = ~paste("Team:", teamID,  # Hover text
+                           "<br>Year:", yearID,
+                           "<br>Attendance:", attendance,
+                           "<br>Home Runs:", HR)
+) %>%
+  layout(
+    title = "Baseball Teams: Attendance vs. Home Runs",
+    xaxis = list(title = "Attendance"),
+    yaxis = list(title = "Home Runs")
+  )
+
+ 
+```
+
+--
+
+.pull-left[
+```{r, warning=FALSE}
+p <- plot_ly(data = Teams,
+             x = ~attendance,
+             y = ~HR, 
+             type = 'scatter', 
+             mode = 'markers') 
+```
+]
+
+.pull-right[
+```{r, echo=F, fig.width = 6.25, fig.height = 4, warning= FALSE}
+p
+```
+]
+---
+
+## Interactive scatter plot
+
+--
+```{r, echo=FALSE, message=FALSE}
+# Prepare the data - adding extra information for interactivity
+plot_data <- Teams %>%
+  filter(yearID >= 2000) %>%  # Filter data from year 2000 onward for better clarity
+  mutate(
+    winning_percentage = W / (W + L),  # Calculate win percentage
+    hover_text = paste(
+      "Team:", teamID,
+      "<br>Year:", yearID,
+      "<br>Attendance:", format(attendance, big.mark=","),
+      "<br>Home Runs:", HR,
+      "<br>Wins:", W,
+      "<br>Winning Percentage:", sprintf("%.3f", winning_percentage)
+    )
+  )
+
+```
+--
+.pull-left[
+```{r}
+# Create the interactive scatter plot
+interactive_plot <- plot_ly(
+  data = plot_data,
+  x = ~attendance,
+  y = ~HR,
+  type = 'scatter',
+  mode = 'markers',
+  marker = list(
+    size = ~W/20,  # Point size based on number of wins
+    sizeref = 2,
+    sizemode = 'area',
+    opacity = 0.7,
+    color = ~winning_percentage,  # Color based on winning percentage
+    colorscale = 'Viridis',       # Color scale
+    showscale = TRUE,             # Show the color scale
+    colorbar = list(
+      title = "Winning Percentage",  # Title for the color bar
+      #tickformat = ".0%",             # Format for color bar ticks
+      len = 0.75,                     # Length of the color bar
+      thickness = 15,                 # Thickness of the color bar
+      xanchor = "right",              # Align to the right
+      titleside = "right"             # Place title on the right side
+    )
+  ),
+  text = ~hover_text,
+  hoverinfo = 'text',
+  name = ~teamID
+) 
+```
+]
+
+```{r, echo=FALSE, message=FALSE}
+
+# Customize the layout and additional interactive features
+interactive_plot <- interactive_plot %>% 
+  layout(
+    xaxis = list(
+      title = "Attendance",
+      tickformat = ",",
+      rangeselector = list(
+        buttons = list(
+          list(
+            count = 5,
+            label = "Last 5 Years",
+            step = "year",
+            stepmode = "backward"
+          ),
+          list(
+            step = "all",
+            label = "All Years"
+          )
+        )
+      )
+    ),
+    yaxis = list(
+      title = "Home Runs"
+    ),
+    showlegend = TRUE,
+    legend = list(
+      title = list(text = "Teams")
+    ),
+    hovermode = 'closest',
+    annotations = list(
+      x = 1.0,
+      y = -0.1,
+      text = "Point size represents number of wins",
+      showarrow = FALSE,
+      xref = 'paper',
+      yref = 'paper',
+      font = list(size = 10)
+    )
+  ) %>%
+  # Additional interactive features
+  config(
+    scrollZoom = TRUE,
+    displayModeBar = TRUE,
+    modeBarButtonsToAdd = list(
+      'hoverclosest',
+      'hovercompare'
+    )
+  )
+
+
+```
+
+
+.pull-right[
+```{r, echo=F, fig.width = 6.25, fig.height = 5}
+interactive_plot
+```
+]
+---
+## Dynamic scatter plot
+```{r, echo=FALSE, message=FALSE}
+# Daten vorbereiten
+plot_data <- Teams %>%
+  filter(yearID >= 1990) %>% 
+  mutate(
+    winning_percentage = W / (W + L),
+    runs_per_game = R/G,
+    hover_text = paste(
+      "Team:", teamID,
+      "<br>Jahr:", yearID,
+      "<br>Zuschauer:", format(attendance, big.mark=","),
+      "<br>Home Runs:", HR,
+      "<br>Runs pro Spiel:", sprintf("%.2f", runs_per_game),
+      "<br>Gewinnquote:", sprintf("%.3f", winning_percentage)
+    )
+  )
+
+```
+
+.pull-left[
+```{r}
+
+dynamic_plot <- plot_ly(
+  data = plot_data,
+  x = ~attendance,
+  y = ~HR,
+  type = 'scatter',
+  mode = 'markers',
+  frame = ~yearID,  
+  ids = ~teamID,    
+  marker = list(
+    size = ~runs_per_game * 2,  
+    sizeref = 0.5,
+    sizemode = 'area',
+    color = ~winning_percentage,
+    colorscale = 'Viridis',
+    showscale = TRUE,
+    colorbar = list(
+      title = "winning quote",
+      tickformat = ".0%"
+    )
+  )
+)
+```
+]
+
+```{r, echo=FALSE, message=FALSE}
+dynamic_plot <- plot_ly(
+  data = plot_data,
+  x = ~attendance,
+  y = ~HR,
+  type = 'scatter',
+  mode = 'markers',
+  frame = ~yearID,  
+  ids = ~teamID,    
+  marker = list(
+    size = ~runs_per_game * 2,  
+    sizeref = 0.5,
+    sizemode = 'area',
+    color = ~winning_percentage,
+    colorscale = 'Viridis',
+    showscale = TRUE,
+    colorbar = list(
+      title = "winning quote",
+      tickformat = ".0%"
+    )
+  ),
+  text = ~hover_text,
+  hoverinfo = 'text'
+)%>%
+  layout(
+    #title = list(
+     # text = "Baseball Teams Entwicklung über Zeit",
+      #font = list(size = 20)
+    #),
+    xaxis = list(
+      title = "audience numbers",
+      tickformat = ",",
+      range = c(min(plot_data$attendance), max(plot_data$attendance))
+    ),
+    yaxis = list(
+      title = "Home Runs",
+      range = c(min(plot_data$HR), max(plot_data$HR))
+    ),
+    showlegend = FALSE,
+    
+    annotations = list(
+      list(
+        x = 1.0,
+        y = -0.15,
+        text = "Point size shows runs per game",
+        showarrow = FALSE,
+        xref = 'paper',
+        yref = 'paper',
+        font = list(size = 10)
+      )
+    )
+  ) %>%
+  animation_opts(
+    frame = 1000,     
+    transition = 500,  
+    easing = "cubic-in-out",
+    redraw = FALSE
+  ) %>%
+  animation_slider(
+    currentvalue = list(
+      prefix = "year: ",
+      font = list(size = 14)
+    )
+  ) %>%
+  animation_button(
+    x = 0.1,          
+    xanchor = "right",
+    y = 0,
+    yanchor = "bottom"
+  ) %>%
+
+  config(
+    scrollZoom = TRUE,
+    displayModeBar = TRUE,
+    modeBarButtonsToAdd = list(
+      'hoverclosest',
+      'hovercompare'
+    )
+  )
+
+```
+
+.pull-right[
+```{r, echo=F, fig.width = 6.25, fig.height = 4}
+
+dynamic_plot
+```
+]
+---
+## Bar Chart
+
+- **Bar Chart**: Displays the number of Walmart stores opened each year from 1962 to 2006
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(plyr)
+library(plotly)
+
+# Read in Walmart data
+df <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/1962_2006_walmart_store_openings.csv")
+
+# First plot - Bar Chart
+total <- plyr::count(df$YEAR)
+fit <- fitted(loess(total$freq ~ total$x))
+
+
+```
+.pull-left[
+
+```{r, warning= F, message= F}
+fig2 <- plot_ly(data = total, x = ~x, y = ~freq, type = "bar", showlegend = FALSE,
+                marker = list(color = ~x, showscale = FALSE)) %>%
+  add_trace(y = fit, type = "scatter", mode = "lines", 
+            line = list(color = 'black'), showlegend = FALSE) %>%
+  layout(showlegend = FALSE, 
+         xaxis = list(side = "right", showgrid = FALSE),
+         yaxis = list(showgrid = FALSE))
+
+
+```
+]
+
+.pull-right[
+
+```{r, echo=F, warning= F,message = F, fig.width = 6.25, fig.height = 4}
+
+fig2
+```
+]
+
+---
+## Geomap
+
+
+- **Geo Map**: Illustrates the geographic distribution of store openings across the United States
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(plyr)
+library(plotly)
+
+# Read in Walmart data
+df <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/1962_2006_walmart_store_openings.csv")
+
+# First plot - Bar Chart
+total <- plyr::count(df$YEAR)
+fit <- fitted(loess(total$freq ~ total$x))
+
+# Second plot - Scattergeo Map
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+
+```
+.pull-left[
+
+```{r, warning= F, message= F}
+
+# Create the geo map (fig3)
+fig3 <- plot_geo(df, lat = ~LAT, lon = ~LON, mode = "markers") %>%
+  add_markers(text = ~OPENDATE, showlegend = FALSE,
+               marker = list(color = ~YEAR, showscale = FALSE),
+               hoverinfo = "text") %>%
+  layout(geo = g, showlegend = FALSE)
+
+
+```
+]
+
+.pull-right[
+
+```{r, echo=F, warning= F, fig.width = 6.25, fig.height = 6}
+
+fig3
+```
+]
+
+
+
+---
+## Wallmart store openings
+
+- **Bar Chart**: Displays the number of Walmart stores opened each year from 1962 to 2006
+
+- **Geo Map**: Illustrates the geographic distribution of store openings across the United States
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(plyr)
+library(plotly)
+
+# Read in Walmart data
+df <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/1962_2006_walmart_store_openings.csv")
+
+# First plot - Bar Chart
+total <- plyr::count(df$YEAR)
+fit <- fitted(loess(total$freq ~ total$x))
+
+# Create the bar chart (fig2)
+fig2 <- plot_ly(data = total, x = ~x, y = ~freq, type = "bar", showlegend = FALSE,
+                 marker = list(color = ~x, showscale = FALSE)) %>%
+  add_lines(y = fit, showlegend = FALSE, color = 'black') %>%
+  layout(showlegend = FALSE, 
+         xaxis = list(side = "right", showgrid = FALSE),
+         yaxis = list(showgrid = FALSE))
+# Second plot - Scattergeo Map
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+# Create the geo map (fig3)
+fig3 <- plot_geo(df, lat = ~LAT, lon = ~LON, mode = "markers") %>%
+  add_markers(text = ~OPENDATE, showlegend = FALSE,
+               marker = list(color = ~YEAR, showscale = FALSE),
+               hoverinfo = "text") %>%
+  layout(geo = g, showlegend = FALSE)
+```
+.pull-left[
+
+```{r, warning= F, message= F}
+
+## Combine the two plots
+combined_plot <- subplot(
+  fig2,          # Bar Chart
+  fig3,          # Geo Map
+  nrows = 2,     # Two rows
+  heights = c(0.6, 0.4)  # Height proportions
+)
+
+# Layout adjustments for the combined plot
+combined_plot <- combined_plot %>%
+  layout(
+         showlegend = FALSE)
+
+
+```
+]
+
+.pull-right[
+
+```{r, echo=F, warning= F, fig.width = 6.25, fig.height = 6}
+
+
+# Display the combined plot
+combined_plot
+```
+]
+
+
+---
+
+## 3D Visualization with Plotly
+
+- Geospatial 3D Mesh: Displays a 3D mesh of Indonesia, Papua New Guinea, New Zealand, and Australia, with color gradients representing elevation.
+- Interactive Plot: Built with Plotly, allowing zoom and rotation for detailed exploration of the terrain.
+
+```{r, echo=FALSE, message=FALSE}
+# Load necessary libraries
+library(anglr)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(plotly)
+library(RColorBrewer)
+library(scales)
+
+# Load world map data
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Create a subset of the map for selected countries
+map1 <- subset(world, name %in% c("Indonesia", "Papua New Guinea", "New Zealand", "Australia"))
+
+# Create a DEL model for the mesh
+delmesh <- anglr::globe(anglr::DEL(map1, max_area = 0.5))
+mesh <- as.mesh3d(delmesh)
+
+# Extract point cloud data
+x <- mesh$vb[1, ]
+y <- mesh$vb[2, ]
+z <- mesh$vb[3, ]
+m <- matrix(c(x, y, z), ncol = 3, dimnames = list(NULL, c("x", "y", "z")))
+
+# Calculate mean height (z) for color mapping
+zmean <- apply(t(mesh$it), MARGIN = 1, function(row) { mean(m[row, 3]) })
+
+# Color palette for the mesh surfaces
+facecolor = colour_ramp(
+  brewer_pal(palette = "RdBu")(9)
+)(rescale(zmean))
+```
+.pull-left[
+
+```{r}
+
+# Create the 3D plot with Plotly
+fig1 <- plot_ly(
+  x = x, y = y, z = z,
+  i = mesh$it[1, ] - 1, j = mesh$it[2, ] - 1, k = mesh$it[3, ] - 1,
+  facecolor = facecolor,
+  type = "mesh3d"
+)
+```
+]
+
+.pull-right[
+
+```{r, echo=F, fig.width = 5.25, fig.height = 6}
+fig1
+```
+]
+
+---
+## GGPLOT
+
+1. **Step 1**: Create or find a ggplot. In this case we'll use the mtcars data from baseR.
+2. **Step 2**: Use ggplotly function to transform.
+- Extra help with [`ggplotly`](https://plotly.com/ggplot2/) plots.
+--
+--
+  .pull-left[
+```{r}
+  data("mtcars")
+  p <- ggplot(mtcars, aes(x = mpg, y = hp)) +
+    geom_point(aes(color = factor(cyl)), size = 3) +
+    labs(
+      title = "Horsepower vs. Miles per Gallon (mpg)",
+      x = "Miles per Gallon (mpg)",
+      y = "Horsepower (hp)",
+      color = "Cylinders"
+    ) +
+    theme_minimal()
+interactive_plot <- ggplotly(p)
+```
+]
+
+  .pull-right[
+```{r, echo=F, fig.width = 6.25, fig.height = 4}
+interactive_plot
+```
+]
+
+
+---
+## Conclusion
+
+- **Key Takeaways**:
+  - Plotly transforms your data visualizations from boring visuals to something not boring!
+  - Seamlessly integrates with R/ R Markdown.
+  - With support for a large variety of chart types, you name it, Plotly’s got it! ️📊
+
+- **Final Thoughts**:
+  - Don't just present data—tell a story that captivates! Use Plotly to sprinkle some magic on your data storytelling.
+  - Dive into interactive features and watch your audience’s faces light up as you impress them with your programming abilities.
+---
+
+
+## Resources
+
+- **Official Documentation**:
+  - [Plotly for R Documentation](https://plotly.com/r/)
+  
+- **Tutorials**:
+  - [RPubs Tutorial](https://rpubs.com/eshel_s/plotlytutorial)
+  
+- **Shared Tools**:
+  - [Github Plotly Community](https://https://github.com/plotly/plotly.R)
+
+---
+
+## Questions
+
+- **Thank you for your time! Lets begin our tutorial!**
+
+---
+
+## Histograms with Plotly
+
+- Lets create histograms to check our distribution (like a good Data Scientist).
+- We'll look at the distribution of Home Runs.
+- Extra help with [`histogram`](https://plotly.com/r/histograms/) plots!
+
+--
+  .pull-left[
+```{r}
+p <- plot_ly(
+  data = Teams,
+  x = ~HR,  
+  type = 'histogram',
+  nbinsx = 50,  
+  marker = list(color = 'lightblue')
+) %>%
+  layout(
+    title = 'Distribution of Home Runs (HR)',
+    xaxis = list(title = 'Home Runs'),
+    yaxis = list(title = 'Frequency')
+  )
+```
+]
+
+  .pull-right[
+```{r, echo=F, fig.width = 6.25, fig.height = 4}
+p
+```
+]
+---
+
+
+
+
+
+
