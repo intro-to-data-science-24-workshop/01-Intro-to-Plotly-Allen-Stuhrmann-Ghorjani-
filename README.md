@@ -38,6 +38,6 @@ The material in this repository is made available under the [MIT license](http:/
 
 **Dominik Allen** prepared the presentation slides, the tutorial, and the practice material. 
 
-**Luisa Stuhrmann ** edited the presentation slides and prepared the recording. 
+**Luisa Stuhrmann** edited the presentation slides and prepared the recording. 
 
-**Fanus Ghorjani ** edited the presentation slides and prepared the recording. 
+**Fanus Ghorjani** edited the presentation slides and prepared the recording. 
