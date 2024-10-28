@@ -1,0 +1,59 @@
+---
+title: "Extra_Tutorial_Practice"
+output: html_document
+date: "2024-10-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Exercise 1: Bar Chart with mpg Dataset
+Objective: Create a bar chart to visualize the number of cars by manufacturer using the mpg dataset from the ggplot2 package.
+
+1. Load the dataset: mpg from ggplot2.
+2. Group by manufacturer and count the number of cars for each.
+3. Plot a bar chart using Plotly:
+  x-axis: Manufacturer
+  y-axis: Count of cars
+4. Customize the bar chart:
+  Add color to represent different manufacturers.
+  Use a title and axis labels for clarity.
+
+```{r}
+#enter code
+```
+
+##Exercise 2: Scatter Plot with mtcars Dataset
+Objective: Create a scatter plot to show the relationship between horsepower and miles per gallon using the mtcars dataset.
+
+1.Load the dataset: mtcars from base R.
+2. Plot a scatter plot using Plotly:
+  x-axis: Horsepower (hp)
+  y-axis: Miles per gallon (mpg)
+  Size: Set the size of points based on the number of cylinders (cyl).
+  Color: Use colors to represent different cylinder counts.
+4. Customize the scatter plot:
+  Add a title and labels for both axes.   
+  Adjust the size and color scale for better visualization.
+  
+```{r}
+#enter code
+```
+  
+##Exercise 3: Line Chart with economics Dataset
+Objective: Create a line chart to analyze the trend of unemployment over time using the economics dataset from the ggplot2 package.
+
+1. Load the dataset: economics from ggplot2.
+2. Plot a line chart using Plotly:
+  x-axis: Date (date)
+  y-axis: Unemployment (unemploy)
+3. Customize the line chart:
+  Add a title and labels for the x and y axes.
+  Adjust the line color and width.
+4. Optionally, add a hover template to show the date and unemployment rate more clearly.
+
+```{r}
+#enter code
+```
+
